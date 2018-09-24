@@ -1,12 +1,26 @@
 import fetch from "node-fetch";
+import redis from "../redis";
 
 const LISTING_URL: string = "https://api.coinmarketcap.com/v2/listings";
 const TICKER_URL: string = "https://api.coinmarketcap.com/v2/ticker";
+const LISTINGS_KEY: string = "LISTINGS";
 
-async function tickerSymbolModel(symbol: string): Promise<any> {
+async function fetchListings(): Promise<any[]> {
+  const listings = await redis.getAsync(LISTINGS_KEY);
+  console.log(listings);
+  if (listings)
+    return JSON.parse(listings);
+  
   const response = await fetch(LISTING_URL);
   const data = await response.json();
-  const listing = data.data.find(crypto => crypto.symbol === symbol);
+  
+  redis.set(LISTINGS_KEY, JSON.stringify(data.data));
+  return data.data;
+}
+
+async function tickerSymbolModel(symbol: string): Promise<any> {
+  const listings: any[] = await fetchListings();
+  const listing = listings.find(crypto => crypto.symbol === symbol);
 
   if (!listing)
     throw new Error(`${symbol} not valid cryptocurrency`);
