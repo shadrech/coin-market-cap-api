@@ -5,7 +5,10 @@
     "rootDir": "ts/",
     "outDir": "js/",
     "sourceMap": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "lib": [
+      "es2017"
+    ]
   },
   "include": [
     "ts/**/*"
