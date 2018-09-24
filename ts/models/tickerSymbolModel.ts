@@ -7,14 +7,17 @@ const LISTINGS_KEY: string = "LISTINGS";
 
 async function fetchListings(): Promise<any[]> {
   const listings = await redis.getAsync(LISTINGS_KEY);
-  console.log(listings);
   if (listings)
     return JSON.parse(listings);
   
   const response = await fetch(LISTING_URL);
   const data = await response.json();
+  const cacheData = data.data.map(d => ({
+    id: d.id,
+    symbol: d.symbol
+  }));
   
-  redis.set(LISTINGS_KEY, JSON.stringify(data.data));
+  redis.set(LISTINGS_KEY, JSON.stringify(cacheData));
   return data.data;
 }
 
